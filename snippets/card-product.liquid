@@ -1,13 +1,113 @@
-<a class="product-card" href="{{ product.url }}" style="display:block; overflow:hidden;">
-  <div>
-    {% if product.featured_image %}
-      {{ product.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: product.title }}
-    {% else %}
-      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-    {% endif %}
+{%- comment -%}
+  Snippet: card-product
+  Parâmetros:
+    product       — objeto produto (obrigatório)
+    card_size     — 'featured' | 'default' (opcional, default: 'default')
+    badge_text    — texto da faixinha (opcional, sobrescreve metafield)
+    badge_position — 'top' | 'bottom' (opcional, default: 'top')
+    sticker_image — imagem do sticker de brinde (opcional)
+    show_sticker  — true | false (opcional, default: false)
+{%- endcomment -%}
+
+{%- liquid
+  assign card_size = card_size | default: 'default'
+  assign swatches_limit = 4
+
+  # Badge: parâmetro > metafield do produto > nada
+  assign resolved_badge = badge_text
+  if resolved_badge == blank
+    assign resolved_badge = product.metafields.custom.badge_text
+  endif
+
+  assign resolved_badge_position = badge_position | default: 'top'
+
+  # Ratings via metafields (compatível com Judge.me, Okendo, Loox, Yotpo)
+  assign rating_value = product.metafields.reviews.rating.value
+  assign rating_count = product.metafields.reviews.rating_count
+
+  # Fallback Okendo
+  if rating_value == blank
+    assign rating_value = product.metafields.okendo.reviews_scoreAverage
+    assign rating_count = product.metafields.okendo.reviews_totalPublishedCount
+  endif
+-%}
+
+<div class="product-card product-card--{{ card_size }}" data-product-id="{{ product.id }}">
+
+  {%- comment -%} — FAIXINHA TOPO — {%- endcomment -%}
+  {%- if resolved_badge != blank and resolved_badge_position == 'top' -%}
+    <div class="product-card__badge product-card__badge--top" style="background:{{ settings.badge_bg_color }};color:{{ settings.badge_text_color }};">
+      {{ resolved_badge }}
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} — IMAGEM — {%- endcomment -%}
+  <a class="product-card__media" href="{{ product.url }}">
+    {%- if product.featured_image != blank -%}
+      {{
+        product.featured_image
+        | image_url: width: 900
+        | image_tag:
+          loading: 'lazy',
+          alt: product.title,
+          widths: '400, 600, 900',
+          class: 'product-card__img'
+      }}
+    {%- else -%}
+      <div class="product-card__placeholder">
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} — FAIXINHA RODAPÉ — {%- endcomment -%}
+    {%- if resolved_badge != blank and resolved_badge_position == 'bottom' -%}
+      <div class="product-card__badge product-card__badge--bottom" style="background:{{ settings.badge_bg_color }};color:{{ settings.badge_text_color }};">
+        {{ resolved_badge }}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} — STICKER DE BRINDE — {%- endcomment -%}
+    {%- if show_sticker -%}
+      <div class="product-card__sticker">
+        <span class="sticker__plus" aria-hidden="true">+</span>
+        {%- if sticker_image != blank -%}
+          <div class="sticker__inner">
+            {{
+              sticker_image
+              | image_url: width: 120
+              | image_tag: loading: 'lazy', alt: 'Brinde'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </a>
+
+  {%- comment -%} — INFOS — {%- endcomment -%}
+  <div class="product-card__info">
+    <a class="product-card__title" href="{{ product.url }}">{{ product.title }}</a>
+    <span class="product-card__price">{{ product.price | money }}</span>
+
+    {%- render 'color-swatches', product: product, swatches_limit: swatches_limit -%}
+
+    {%- if rating_value != blank -%}
+      <div class="product-card__rating">
+        <span class="rating-stars" aria-hidden="true">
+          {%- assign rating_rounded = rating_value | times: 1 | round: 1 -%}
+          {%- for i in (1..5) -%}
+            {%- if i <= rating_rounded -%}
+              <svg class="star star--full" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {%- else -%}
+              <svg class="star star--empty" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {%- endif -%}
+          {%- endfor -%}
+        </span>
+        <span class="rating-value">{{ rating_value }}</span>
+        {%- if rating_count != blank -%}
+          <a class="rating-count" href="{{ product.url }}#reviews">{{ rating_count }} reviews</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
   </div>
-  <div class="card">
-    <h3 style="margin-top:0;">{{ product.title }}</h3>
-    <p class="price" style="margin-bottom:0;">{{ product.price | money }}</p>
-  </div>
-</a>
+
+</div>

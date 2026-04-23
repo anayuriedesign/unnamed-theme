@@ -11,7 +11,7 @@
         "type": "color",
         "id": "accent_color",
         "label": "Accent color",
-        "default": "#111111"
+        "default": "#E8637A"
       },
       {
         "type": "color",
@@ -19,23 +19,52 @@
         "label": "Background color",
         "default": "#ffffff"
       }
-    ],
+    ]
   },
   {
-  "name": "Typography",
-  "settings": [
-    {
-      "type": "font_picker",
-      "id": "heading_font",
-      "label": "Title font",
-      "default": "helvetica_n4"
-    },
-    {
-      "type": "font_picker",
-      "id": "body_font",
-      "label": "Body font",
-      "default": "helvetica_n4"
-    }
-  ]
-}
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "heading_font",
+        "label": "Title font",
+        "default": "helvetica_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "body_font",
+        "label": "Body font",
+        "default": "helvetica_n4"
+      }
+    ]
+  },
+  {
+    "name": "Color Swatches",
+    "settings": [
+      {
+        "type": "textarea",
+        "id": "custom_color_swatches",
+        "label": "Custom color swatches",
+        "info": "Uma cor por linha, no formato: nome:#hexcode — Ex: rose gold:#B76E79",
+        "default": "rose gold:#B76E79,terracota:#C47451,cereja:#C0392B"
+      }
+    ]
+  },
+  {
+    "name": "Product badges",
+    "settings": [
+      {
+        "type": "color",
+        "id": "badge_bg_color",
+        "label": "Badge background color",
+        "default": "#C0392B"
+      },
+      {
+        "type": "color",
+        "id": "badge_text_color",
+        "label": "Badge text color",
+        "default": "#ffffff"
+      }
+    ]
+  }
 ]

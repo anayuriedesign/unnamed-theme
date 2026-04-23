@@ -1,0 +1,581 @@
+{%- comment -%}
+  Seção: Featured Collection Spotlight
+  Slider com produto central em destaque. Tabs para múltiplas coleções.
+{%- endcomment -%}
+
+{%- style -%}
+  #spotlight-{{ section.id }} {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  /* ── TABS ── */
+  .spotlight-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 4vw, 60px);
+    margin-bottom: 32px;
+  }
+
+  .spotlight-tab {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 600;
+    color: {{ section.settings.tab_inactive_color }};
+    padding: 0;
+    position: relative;
+    transition: color 0.3s ease;
+    letter-spacing: -0.02em;
+  }
+
+  .spotlight-tab.is-active {
+    color: {{ section.settings.tab_active_color }};
+    text-decoration: underline;
+    text-decoration-color: {{ section.settings.tab_active_color }};
+    text-underline-offset: 6px;
+    text-decoration-thickness: 2px;
+  }
+
+  /* ── SLIDER WRAPPER ── */
+  .spotlight-slider {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: {{ section.settings.card_gap }}px;
+    padding: 0 20px;
+  }
+
+  /* ── CARDS ── */
+  .spotlight-slider .product-card {
+    flex: 0 0 auto;
+    cursor: pointer;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.5s ease,
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Destaque central */
+  .spotlight-slider .product-card--spotlight {
+    width: {{ section.settings.featured_width }}px;
+    opacity: 1;
+    z-index: 2;
+  }
+
+  /* Adjacentes */
+  .spotlight-slider .product-card--side {
+    width: {{ section.settings.side_width }}px;
+    opacity: 1;
+    z-index: 1;
+  }
+
+  /* Ocultos (fora de vista) */
+  .spotlight-slider .product-card--hidden {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* ── MEDIA DO CARD ── */
+  .product-card__media {
+    display: block;
+    position: relative;
+    border-radius: {{ section.settings.card_radius }}px;
+    overflow: hidden;
+    background: #f0f0f0;
+    aspect-ratio: 3/4;
+    text-decoration: none;
+  }
+
+  .product-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .product-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8e8e8;
+  }
+
+  /* ── BADGE / FAIXINHA ── */
+  .product-card__badge {
+    position: absolute;
+    left: 0; right: 0;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    z-index: 3;
+  }
+  .product-card__badge--top { top: 0; }
+  .product-card__badge--bottom { bottom: 0; }
+
+  /* ── STICKER ── */
+  .product-card__sticker {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 64px;
+    height: 64px;
+    z-index: 4;
+  }
+
+  .sticker__plus {
+    position: absolute;
+    top: -10px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    background: {{ settings.accent_color | default: '#E8637A' }};
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    z-index: 5;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .sticker__inner {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sticker__inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  /* ── INFOS ── */
+  .product-card__info {
+    padding: 12px 4px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .product-card__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color, #111);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-card--spotlight .product-card__title {
+    font-size: 18px;
+  }
+
+  .product-card__price {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color, #111);
+  }
+
+  .product-card--spotlight .product-card__price {
+    font-size: 16px;
+  }
+
+  /* ── SWATCHES ── */
+  .product-swatches {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .swatch-dot {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    cursor: default;
+    transition: transform 0.2s ease;
+  }
+
+  .product-card--spotlight .swatch-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  .swatch-dot:hover { transform: scale(1.15); }
+
+  .swatch-more {
+    font-size: 11px;
+    color: var(--muted-color, #888);
+  }
+
+  /* ── RATINGS ── */
+  .product-card__rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .rating-stars {
+    display: flex;
+    gap: 1px;
+  }
+
+  .star {
+    width: 13px;
+    height: 13px;
+    fill: {{ section.settings.star_color }};
+  }
+
+  .star--empty {
+    fill: #e0e0e0;
+  }
+
+  .product-card--spotlight .star {
+    width: 16px;
+    height: 16px;
+  }
+
+  .rating-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-color, #111);
+  }
+
+  .rating-count {
+    font-size: 12px;
+    color: var(--muted-color, #888);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ── PAINÉIS ── */
+  .spotlight-panel { display: none; }
+  .spotlight-panel.is-active { display: block; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .spotlight-slider {
+      gap: 10px;
+    }
+    .spotlight-slider .product-card--spotlight {
+      width: 58vw;
+    }
+    .spotlight-slider .product-card--side {
+      width: 24vw;
+    }
+  }
+{%- endstyle -%}
+
+<section id="spotlight-{{ section.id }}" class="section">
+  <div class="page-width">
+
+    {%- comment -%} TABS {%- endcomment -%}
+    {%- assign has_tabs = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'collection_tab' -%}{%- assign has_tabs = true -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_tabs -%}
+      <div class="spotlight-tabs" role="tablist">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'collection_tab' -%}
+            <button
+              class="spotlight-tab{% if forloop.first %} is-active{% endif %}"
+              role="tab"
+              data-tab="{{ section.id }}-{{ forloop.index }}"
+              aria-selected="{{ forloop.first }}"
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.tab_label | default: block.settings.collection.title }}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} PAINÉIS {%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'collection_tab' -%}
+        {%- assign tab_collection = block.settings.collection -%}
+        <div
+          class="spotlight-panel{% if forloop.first %} is-active{% endif %}"
+          id="panel-{{ section.id }}-{{ forloop.index }}"
+          role="tabpanel"
+          data-panel="{{ section.id }}-{{ forloop.index }}"
+        >
+          {%- if tab_collection != blank -%}
+            {%- assign tab_products = tab_collection.products | slice: 0, section.settings.products_to_show -%}
+            {%- assign total = tab_products.size -%}
+            {%- assign center_index = total | divided_by: 2 -%}
+
+            <div
+              class="spotlight-slider"
+              data-spotlight="{{ section.id }}-{{ forloop.index }}"
+              data-center="{{ center_index }}"
+            >
+              {%- for product in tab_products -%}
+                {%- liquid
+                  assign pos = forloop.index0
+                  if pos == center_index
+                    assign card_size = 'featured spotlight'
+                    assign size_class = 'product-card--spotlight'
+                  elsif pos == center_index | minus: 1 or pos == center_index | plus: 1
+                    assign card_size = 'default side'
+                    assign size_class = 'product-card--side'
+                  else
+                    assign card_size = 'default hidden'
+                    assign size_class = 'product-card--hidden'
+                  endif
+                -%}
+                <div
+                  class="product-card {{ size_class }}"
+                  data-index="{{ forloop.index0 }}"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Ver {{ product.title }}"
+                >
+                  {%- comment -%} Badge / Faixinha {%- endcomment -%}
+                  {%- assign badge_text = product.metafields.custom.badge_text -%}
+                  {%- assign sticker_image = product.metafields.custom.sticker_image -%}
+                  {%- assign show_sticker = false -%}
+                  {%- if product.metafields.custom.show_sticker == true or sticker_image != blank -%}
+                    {%- assign show_sticker = true -%}
+                  {%- endif -%}
+
+                  {%- render 'card-product',
+                    product: product,
+                    card_size: card_size,
+                    badge_text: badge_text,
+                    badge_position: section.settings.badge_position,
+                    sticker_image: sticker_image,
+                    show_sticker: show_sticker
+                  -%}
+                </div>
+              {%- endfor -%}
+            </div>
+
+          {%- else -%}
+            <div class="empty-state">Selecione uma coleção nas configurações desta aba.</div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+  </div>
+</section>
+
+<script>
+(function() {
+  const section = document.getElementById('spotlight-{{ section.id }}');
+  if (!section) return;
+
+  // ── TABS ──
+  section.querySelectorAll('.spotlight-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      section.querySelectorAll('.spotlight-tab').forEach(t => {
+        t.classList.remove('is-active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      section.querySelectorAll('.spotlight-panel').forEach(p => p.classList.remove('is-active'));
+
+      tab.classList.add('is-active');
+      tab.setAttribute('aria-selected', 'true');
+      const panelId = 'panel-' + tab.dataset.tab;
+      const panel = section.querySelector('[data-panel="' + tab.dataset.tab + '"]');
+      if (panel) panel.classList.add('is-active');
+    });
+  });
+
+  // ── SPOTLIGHT SLIDER ──
+  function initSlider(slider) {
+    let centerIndex = parseInt(slider.dataset.center, 10);
+    const cards = Array.from(slider.querySelectorAll('.product-card[data-index]'));
+    const total = cards.length;
+
+    function updateCards() {
+      cards.forEach((card, i) => {
+        card.classList.remove('product-card--spotlight', 'product-card--side', 'product-card--hidden');
+        const dist = Math.abs(i - centerIndex);
+        if (dist === 0) {
+          card.classList.add('product-card--spotlight');
+        } else if (dist === 1) {
+          card.classList.add('product-card--side');
+        } else {
+          card.classList.add('product-card--hidden');
+        }
+      });
+    }
+
+    function onCardClick(card) {
+      const clickedIndex = parseInt(card.dataset.index, 10);
+      if (clickedIndex === centerIndex) {
+        // Clique no central → vai para PDP
+        const link = card.querySelector('a.product-card__media');
+        if (link) window.location.href = link.href;
+        return;
+      }
+      centerIndex = clickedIndex;
+      updateCards();
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => onCardClick(card));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(card); }
+      });
+    });
+  }
+
+  section.querySelectorAll('.spotlight-slider').forEach(initSlider);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Spotlight",
+  "tag": "section",
+  "class": "section-spotlight",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Produtos por aba",
+      "min": 3,
+      "max": 9,
+      "step": 2,
+      "default": 5,
+      "info": "Use sempre números ímpares para o destaque central funcionar corretamente."
+    },
+    {
+      "type": "range",
+      "id": "featured_width",
+      "label": "Largura do card em destaque (px)",
+      "min": 200,
+      "max": 500,
+      "step": 10,
+      "default": 340
+    },
+    {
+      "type": "range",
+      "id": "side_width",
+      "label": "Largura dos cards laterais (px)",
+      "min": 100,
+      "max": 300,
+      "step": 10,
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espaço entre cards (px)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Arredondamento dos cards (px)",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "badge_position",
+      "label": "Posição da faixinha",
+      "options": [
+        { "value": "top", "label": "Topo" },
+        { "value": "bottom", "label": "Rodapé" }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Cor das estrelas",
+      "default": "#F4A520"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Cor da tab ativa",
+      "default": "#C0392B"
+    },
+    {
+      "type": "color",
+      "id": "tab_inactive_color",
+      "label": "Cor das tabs inativas",
+      "default": "#E8BFBF"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Espaçamento superior (px)",
+      "min": 0, "max": 100, "step": 4, "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Espaçamento inferior (px)",
+      "min": 0, "max": 100, "step": 4, "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tab",
+      "name": "Aba de coleção",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_label",
+          "label": "Nome da aba",
+          "info": "Deixe em branco para usar o nome da coleção."
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Coleção"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Spotlight",
+      "blocks": [
+        { "type": "collection_tab", "settings": { "tab_label": "cherry cola" } },
+        { "type": "collection_tab", "settings": { "tab_label": "new collection" } },
+        { "type": "collection_tab", "settings": { "tab_label": "bestsellers" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

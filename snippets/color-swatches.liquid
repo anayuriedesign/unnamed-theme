@@ -1,0 +1,88 @@
+{%- comment -%}
+  Snippet: color-swatches
+  Uso: {% render 'color-swatches', product: product %}
+  Lê a opção "Cor" / "Color" / "Colour" do produto e renderiza bolinhas.
+  A cor real vem de:
+    1. settings_schema custom swatches (override do lojista)
+    2. Dicionário default embutido aqui
+    3. Fallback: #ccc
+{%- endcomment -%}
+
+{%- liquid
+  assign color_option = nil
+  for option in product.options_with_values
+    assign option_name_down = option.name | downcase
+    if option_name_down == 'cor' or option_name_down == 'color' or option_name_down == 'colour' or option_name_down == 'cores'
+      assign color_option = option
+      break
+    endif
+  endfor
+-%}
+
+{%- if color_option != blank -%}
+  <div class="product-swatches" aria-label="Cores disponíveis">
+    {%- for value in color_option.values limit: swatches_limit | default: 5 -%}
+      {%- liquid
+        assign value_down = value | downcase | strip
+        assign swatch_color = ''
+
+        # 1. Tenta achar no custom swatches do settings (formato "nome:#hex,nome:#hex")
+        assign custom_swatches = settings.custom_color_swatches | split: ','
+        for swatch in custom_swatches
+          assign parts = swatch | split: ':'
+          assign swatch_name = parts[0] | downcase | strip
+          if swatch_name == value_down
+            assign swatch_color = parts[1] | strip
+            break
+          endif
+        endfor
+
+        # 2. Dicionário default
+        if swatch_color == ''
+          case value_down
+            when 'coral' or 'laranja'
+              assign swatch_color = '#F4845F'
+            when 'vermelho' or 'red' or 'cherry' or 'cherry cola'
+              assign swatch_color = '#C0392B'
+            when 'rosa' or 'pink'
+              assign swatch_color = '#E91E8C'
+            when 'rosa claro' or 'light pink' or 'baby pink'
+              assign swatch_color = '#F4A7B9'
+            when 'lilás' or 'lilas' or 'lilac' or 'roxo' or 'purple'
+              assign swatch_color = '#C39BD3'
+            when 'nude' or 'bege' or 'beige'
+              assign swatch_color = '#D4A574'
+            when 'marrom' or 'brown' or 'chocolate'
+              assign swatch_color = '#795548'
+            when 'preto' or 'black'
+              assign swatch_color = '#1a1a1a'
+            when 'branco' or 'white'
+              assign swatch_color = '#f5f5f5'
+            when 'dourado' or 'gold'
+              assign swatch_color = '#D4AF37'
+            when 'bronze'
+              assign swatch_color = '#CD7F32'
+            when 'pêssego' or 'pessego' or 'peach'
+              assign swatch_color = '#FFBE98'
+            when 'vinho' or 'bordeaux' or 'bordo'
+              assign swatch_color = '#722F37'
+            when 'terracota' or 'terra'
+              assign swatch_color = '#C47451'
+            else
+              assign swatch_color = '#cccccc'
+          endcase
+        endif
+      -%}
+      <span
+        class="swatch-dot"
+        style="background-color: {{ swatch_color }};"
+        title="{{ value }}"
+        aria-label="{{ value }}"
+      ></span>
+    {%- endfor -%}
+    {%- if color_option.values.size > swatches_limit -%}
+      {%- assign remaining = color_option.values.size | minus: swatches_limit -%}
+      <span class="swatch-more">+{{ remaining }}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
