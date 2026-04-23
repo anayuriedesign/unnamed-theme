@@ -24,10 +24,29 @@
 
     {{ content_for_header }}
 
+    {%- comment -%} Shopify Font Library — carrega as fontes escolhidas no admin {%- endcomment -%}
+    {%- assign body_font = settings.body_font -%}
+    {%- assign heading_font = settings.heading_font -%}
+    {{ body_font | font_face: font_display: 'swap' }}
+    {{ heading_font | font_face: font_display: 'swap' }}
+    {%- assign body_font_bold = body_font | font_modify: 'weight', 'bolder' -%}
+    {%- assign body_font_italic = body_font | font_modify: 'style', 'italic' -%}
+    {%- if body_font_bold -%}{{ body_font_bold | font_face: font_display: 'swap' }}{%- endif -%}
+    {%- if body_font_italic -%}{{ body_font_italic | font_face: font_display: 'swap' }}{%- endif -%}
+
+    <style>
+      :root {
+        --font-body-family: {{ body_font.family | json }}, {{ body_font.fallback_families }};
+        --font-body-style: {{ body_font.style }};
+        --font-body-weight: {{ body_font.weight }};
+        --font-heading-family: {{ heading_font.family | json }}, {{ heading_font.fallback_families }};
+        --font-heading-style: {{ heading_font.style }};
+        --font-heading-weight: {{ heading_font.weight }};
+      }
+    </style>
+
     {{ 'base.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
-
-    
   </head>
   <body class="template-{{ template.name | handle }}">
     <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_text' | t }}</a>

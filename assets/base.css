@@ -204,15 +204,15 @@ button[type="submit"] {
   }
 }
 
-:root {
-  --font-body: 'Inter', sans-serif;
-  --font-heading: 'Inter', sans-serif;
-}
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
 }
 
-h1, h2, h3 {
-  font-family: var(--font-heading);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
 }

@@ -1,0 +1,307 @@
+{%- comment -%}
+  Seção: Category Slider
+  Mini menu de categorias em formato circular com hover animado.
+{%- endcomment -%}
+
+{%- style -%}
+  .category-slider-section {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .category-slider-track {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: {{ section.settings.gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* Centraliza quando couber na tela */
+    justify-content: center;
+  }
+
+  .category-slider-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Quando os itens ultrapassam a tela, volta a alinhar à esquerda */
+  @media (max-width: 768px) {
+    .category-slider-track {
+      justify-content: flex-start;
+      padding: 0 20px;
+    }
+  }
+
+  .category-item {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .category-circle {
+    position: relative;
+    width: {{ section.settings.circle_size }}px;
+    height: {{ section.settings.circle_size }}px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f5f5f5;
+    cursor: pointer;
+  }
+
+  .category-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.4s ease;
+  }
+
+  /* Overlay do hover */
+  .category-circle__overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: {{ section.settings.hover_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .category-circle__overlay span {
+    color: {{ section.settings.hover_text_color }};
+    font-size: {{ section.settings.hover_font_size }}px;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 12px;
+    line-height: 1.2;
+  }
+
+  /* Hover states */
+  .category-item:hover .category-circle img {
+    transform: scale(1.05);
+  }
+
+  .category-item:hover .category-circle__overlay {
+    opacity: 1;
+  }
+
+  /* Label abaixo (visível sempre, some no hover se configurado) */
+  .category-label {
+    font-size: {{ section.settings.label_font_size }}px;
+    font-weight: 500;
+    color: var(--text-color, #111);
+    text-align: center;
+    max-width: {{ section.settings.circle_size }}px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    {%- if section.settings.hide_label_on_hover %}
+    transition: opacity 0.3s ease;
+    {%- endif %}
+  }
+
+  {%- if section.settings.hide_label_on_hover %}
+  .category-item:hover .category-label {
+    opacity: 0;
+  }
+  {%- endif %}
+
+  /* Mobile: tamanho reduzido */
+  @media (max-width: 640px) {
+    .category-circle {
+      width: {{ section.settings.circle_size | times: 0.75 | round }}px;
+      height: {{ section.settings.circle_size | times: 0.75 | round }}px;
+    }
+    .category-label {
+      font-size: {{ section.settings.label_font_size | minus: 2 }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="category-slider-section">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <h2 class="section-title" style="text-align: {{ section.settings.title_align }};">
+        {{ section.settings.title }}
+      </h2>
+    {%- endif -%}
+  </div>
+
+  <div class="category-slider-track">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'category' -%}
+        <a
+          class="category-item"
+          href="{{ block.settings.link | default: '#' }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="category-circle">
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 400
+                | image_tag:
+                  loading: 'lazy',
+                  alt: block.settings.label,
+                  widths: '200, 300, 400'
+              }}
+            {%- else -%}
+              <div style="width:100%;height:100%;background:#eee;border-radius:50%;"></div>
+            {%- endif -%}
+            <div class="category-circle__overlay">
+              <span>{{ block.settings.label }}</span>
+            </div>
+          </div>
+          {%- unless section.settings.hide_label_on_hover and section.settings.label_only_on_hover -%}
+            <span class="category-label">{{ block.settings.label }}</span>
+          {%- endunless -%}
+        </a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Category Slider",
+  "tag": "section",
+  "class": "section-category-slider",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título da seção",
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "title_align",
+      "label": "Alinhamento do título",
+      "options": [
+        { "value": "left", "label": "Esquerda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Direita" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "label": "Tamanho dos círculos (px)",
+      "min": 80,
+      "max": 220,
+      "step": 10,
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Espaço entre itens (px)",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "hover_color",
+      "label": "Cor do overlay no hover",
+      "default": "#E8637A"
+    },
+    {
+      "type": "color",
+      "id": "hover_text_color",
+      "label": "Cor do texto no hover",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "hover_font_size",
+      "label": "Tamanho da fonte no hover (px)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Tamanho da label abaixo (px)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "default": 13
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_label_on_hover",
+      "label": "Esconder label ao fazer hover",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Espaçamento superior (px)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Espaçamento inferior (px)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Categoria",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagem"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Nome da categoria",
+          "default": "Categoria"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link da categoria"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Slider",
+      "blocks": [
+        { "type": "category", "settings": { "label": "Lip" } },
+        { "type": "category", "settings": { "label": "Blush" } },
+        { "type": "category", "settings": { "label": "Base" } },
+        { "type": "category", "settings": { "label": "Olhos" } },
+        { "type": "category", "settings": { "label": "Blush" } },
+        { "type": "category", "settings": { "label": "Pó" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
