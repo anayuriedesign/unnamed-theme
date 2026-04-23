@@ -341,10 +341,12 @@
               {%- for product in tab_products -%}
                 {%- liquid
                   assign pos = forloop.index0
+                  assign prev_index = center_index | minus: 1
+                  assign next_index = center_index | plus: 1
                   if pos == center_index
                     assign card_size = 'featured spotlight'
                     assign size_class = 'product-card--spotlight'
-                  elsif pos == center_index | minus: 1 or pos == center_index | plus: 1
+                  elsif pos == prev_index or pos == next_index
                     assign card_size = 'default side'
                     assign size_class = 'product-card--side'
                   else
