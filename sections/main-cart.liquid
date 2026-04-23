@@ -1,0 +1,48 @@
+<section class="section">
+  <div class="page-width">
+    <h1 class="section-title">{{ 'cart.general.title' | t }}</h1>
+
+    {% if cart.item_count == 0 %}
+      <div class="empty-state">
+        <p>{{ 'cart.general.empty' | t }}</p>
+        <a class="button button--secondary" href="{{ routes.all_products_collection_url }}">{{ 'general.continue_shopping' | t }}</a>
+      </div>
+    {% else %}
+      <form action="{{ routes.cart_url }}" method="post" class="cart-layout">
+        <div class="cart-card">
+          {% for item in cart.items %}
+            <div style="display:grid; grid-template-columns: 90px 1fr auto; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,.08);">
+              <div>
+                {% if item.image %}
+                  {{ item.image | image_url: width: 180 | image_tag: loading: 'lazy', alt: item.product.title }}
+                {% endif %}
+              </div>
+              <div>
+                <strong>{{ item.product.title }}</strong>
+                <div class="muted">{{ item.final_price | money }}</div>
+              </div>
+              <div>
+                <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" data-quantity-input>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="cart-card">
+          <p><strong>{{ 'cart.general.subtotal' | t }}:</strong> {{ cart.total_price | money }}</p>
+          <div style="display:flex; gap:.75rem; flex-wrap:wrap;">
+            <button type="submit" name="update">Atualizar carrinho</button>
+            <button type="submit" name="checkout">{{ 'cart.general.checkout' | t }}</button>
+          </div>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main cart",
+  "settings": []
+}
+{% endschema %}

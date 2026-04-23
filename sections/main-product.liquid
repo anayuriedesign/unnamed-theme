@@ -1,0 +1,50 @@
+<section class="section">
+  <div class="page-width product-layout">
+    <div class="product-media">
+      {% if product.featured_media != blank %}
+        {{ product.featured_media | image_url: width: 1200 | image_tag: loading: 'lazy', alt: product.title }}
+      {% else %}
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% endif %}
+    </div>
+
+    <div class="product-info">
+      <h1 class="section-title">{{ product.title }}</h1>
+      <div class="price">{{ product.price | money }}</div>
+
+      {% if product.description != blank %}
+        <div class="section-subtitle">{{ product.description }}</div>
+      {% endif %}
+
+      {% form 'product', product %}
+        {% unless product.has_only_default_variant %}
+          {% for option in product.options_with_values %}
+            <div class="field">
+              <label>{{ option.name }}</label>
+              <select name="options[{{ option.name | escape }}]">
+                {% for value in option.values %}
+                  <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+        {% endunless %}
+
+        <div class="field">
+          <label for="Quantity-{{ section.id }}">{{ 'products.product.quantity' | t }}</label>
+          <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" data-quantity-input>
+        </div>
+
+        <button type="submit">{{ 'products.product.add_to_cart' | t }}</button>
+        {{ form | payment_button }}
+      {% endform %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main product",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,669 @@
+{%- comment -%}
+  Secção: Cabeçalho Principal (Header)
+  Descrição: Cabeçalho robusto com opções de transparência, posicionamento flexível e menu fixo.
+{%- endcomment -%}
+
+{%- style -%}
+  /* --- Variáveis CSS baseadas nas definições (Settings) --- */
+  :root {
+    --header-bg-color: {{ section.settings.bg_color }};
+    --header-text-color: {{ section.settings.text_color }};
+    --header-icon-color: {{ section.settings.icon_color }};
+    
+    --header-transparent-text: {{ section.settings.transparent_text_color }};
+    --header-transparent-icon: {{ section.settings.transparent_icon_color }};
+    --header-transparent-blur: {{ section.settings.transparent_blur }}px;
+    
+    --header-logo-width: {{ section.settings.logo_width }}px;
+    
+    --drawer-close-bg: {{ section.settings.drawer_close_bg }};
+    --drawer-close-color: {{ section.settings.drawer_close_color }};
+  }
+
+  /* --- Estilos Principais do Cabeçalho --- */
+  .site-header {
+    width: 100%;
+    background-color: var(--header-bg-color);
+    color: var(--header-text-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    z-index: 1000; /* Z-index alto para garantir sobreposição */
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+  }
+
+  /* Estado Transparente (Apenas na Home) */
+  .site-header.is-transparent {
+    background-color: transparent;
+    border-bottom-color: transparent;
+    color: var(--header-transparent-text);
+    backdrop-filter: blur(var(--header-transparent-blur));
+    -webkit-backdrop-filter: blur(var(--header-transparent-blur));
+  }
+
+  /* Estado Fixo (Sticky) */
+  .site-header.is-sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Se for Transparente E Sticky, transita para fixed no scroll */
+  .site-header.is-transparent.is-sticky.scrolled-down {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* Comportamento ao fazer scroll para baixo */
+  .site-header.scrolled-down {
+    background-color: var(--header-bg-color);
+    color: var(--header-text-color);
+    border-bottom-color: rgba(0,0,0,0.05);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .header-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 8px 40px;
+    display: grid;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* --- Disposições de Layout com Correção de Ordem --- */
+  /* 1. Logotipo ao Centro, Menu à Esquerda */
+  .layout-logo-center-menu-left .header-wrapper {
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .layout-logo-center-menu-left .header-nav,
+  .layout-logo-center-menu-left .header-mobile-left { order: 1; justify-self: start; }
+  .layout-logo-center-menu-left .header-logo { order: 2; justify-self: center; }
+  .layout-logo-center-menu-left .header-icons { order: 3; justify-self: end; }
+
+  /* 2. Logotipo à Esquerda, Menu ao Centro */
+  .layout-logo-left-menu-center .header-wrapper {
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .layout-logo-left-menu-center .header-logo { order: 1; justify-self: start; }
+  .layout-logo-left-menu-center .header-nav,
+  .layout-logo-left-menu-center .header-mobile-left { order: 2; justify-self: center; }
+  .layout-logo-left-menu-center .header-icons { order: 3; justify-self: end; }
+
+  /* --- Elementos Internos --- */
+  .header-logo a {
+    display: block;
+    line-height: 0;
+    background-color: transparent !important;
+  }
+  .header-logo img {
+    width: var(--header-logo-width);
+    height: auto;
+    max-width: 100%;
+    background-color: transparent !important;
+  }
+
+  /* Lógica de troca do Logotipo Transparente vs Normal */
+  .logo-transparent { display: none; }
+  
+  {%- if section.settings.transparent_logo != blank -%}
+    .site-header.is-transparent:not(.scrolled-down) .logo-transparent {
+      display: block;
+    }
+    .site-header.is-transparent:not(.scrolled-down) .logo-main {
+      display: none;
+    }
+  {%- endif -%}
+
+  /* Navegação */
+  .header-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 30px;
+  }
+  .header-nav a {
+    text-decoration: none;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .header-nav li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-arrow {
+    width: 10px;
+    height: 10px;
+    fill: currentColor;
+  }
+
+  /* Ícones */
+  .header-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .header-icons a, .header-icons button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--header-icon-color);
+  }
+  .site-header.is-transparent:not(.scrolled-down) .header-icons a,
+  .site-header.is-transparent:not(.scrolled-down) .header-icons button,
+  .site-header.is-transparent:not(.scrolled-down) .mobile-menu-toggle {
+    color: var(--header-transparent-icon);
+  }
+  
+  /* Estilo dos ícones (Line art suave) */
+  .header-icon-svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* --- Search Bar Dropdown --- */
+  .header-search-bar {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--header-bg-color);
+    color: var(--header-text-color);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    z-index: 999;
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .header-search-bar.is-active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  .search-bar-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .search-form {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-form input {
+    width: 100%;
+    padding: 12px 45px 12px 20px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 30px;
+    font-size: 16px;
+    background: transparent;
+    color: var(--header-text-color);
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .search-form input:focus {
+    border-color: rgba(0,0,0,0.4);
+  }
+  .search-submit {
+    position: absolute;
+    right: 15px;
+    background: none; border: none; cursor: pointer; color: var(--header-text-color);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .search-submit svg { width: 20px; height: 20px; stroke-width: 2px; }
+  
+  .search-close {
+    background: none; border: none; cursor: pointer; color: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .search-close svg { width: 24px; height: 24px; stroke-width: 1.5; }
+
+  /* --- Mobile Menu (Modal Flutuante) --- */
+  .mobile-drawer-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6);
+    z-index: 1999;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .mobile-drawer-overlay.is-active {
+    opacity: 1; visibility: visible;
+  }
+
+  .mobile-drawer {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 90%; max-width: 400px; max-height: 85vh;
+    background-color: var(--header-bg-color);
+    color: var(--header-text-color);
+    z-index: 2000;
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    opacity: 0; visibility: hidden;
+    transform: translate(-50%, -45%) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .mobile-drawer.is-active {
+    opacity: 1; visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  
+  .drawer-close {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background-color: var(--drawer-close-bg);
+    color: var(--drawer-close-color);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 2001;
+  }
+  .drawer-close svg { width: 22px; height: 22px; stroke-width: 2px; }
+  
+  .drawer-nav { padding: 40px 24px 20px; overflow-y: auto; flex-grow: 1; }
+  .drawer-nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 24px; }
+  .drawer-nav a { 
+    text-decoration: none; color: inherit; font-size: 18px; font-weight: 500; display: flex; align-items: center; justify-content: space-between;
+  }
+  
+  .drawer-nav-arrow {
+    width: 20px; height: 20px;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(0,0,0,0.4);
+  }
+  .drawer-nav-arrow svg { width: 12px; height: 12px; stroke-width: 2.5; }
+
+  .drawer-footer {
+    padding: 24px 0;
+    margin: 0 24px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+  .drawer-footer a {
+    text-decoration: none; color: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center;
+  }
+
+  /* --- Regras Desktop vs Mobile e Toggle do Drawer no Desktop --- */
+  .header-mobile-left { display: none; }
+  
+  {%- if section.settings.desktop_drawer -%}
+    .header-mobile-left { display: flex; align-items: center; min-width: 0; }
+    .mobile-menu-toggle { background: none; border: none; padding: 0; cursor: pointer; color: inherit; display: flex; align-items: center; }
+    .header-nav { display: none !important; }
+  {%- endif -%}
+  
+  @media screen and (max-width: 768px) {
+    .header-nav { display: none !important; }
+    
+    .icon-account { display: none !important; }
+    
+    .header-mobile-left { display: flex !important; align-items: center; justify-self: start !important; order: 1 !important; min-width: 0; }
+    .mobile-menu-toggle { background: none; border: none; padding: 0; cursor: pointer; color: inherit; display: flex; align-items: center; }
+    
+    .header-wrapper {
+      padding: 8px 20px;
+      grid-template-columns: 1fr auto 1fr !important; 
+    }
+    .header-logo { justify-self: center !important; order: 2 !important; }
+    .header-icons { justify-self: end !important; justify-content: flex-end; gap: 15px; order: 3 !important; min-width: 0; }
+    
+    .search-bar-inner { padding: 15px 20px; }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign is_transparent = false
+  if section.settings.enable_transparent and template.name == 'index'
+    assign is_transparent = true
+  endif
+-%}
+
+{%- if is_transparent -%}
+  <style>
+    #shopify-section-{{ section.id }} {
+      position: absolute !important;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+  </style>
+{%- endif -%}
+
+<header id="SiteHeader" class="site-header layout-{{ section.settings.layout }} {% if is_transparent %}is-transparent{% endif %} {% if section.settings.enable_sticky %}is-sticky{% endif %}">
+  <div class="header-wrapper">
+    
+    <!-- 0. Menu Hamburger (Apenas Mobile ou Se Ativado no Desktop) -->
+    <div class="header-mobile-left">
+      <button class="mobile-menu-toggle" id="OpenMobileMenu">
+        <svg class="header-icon-svg" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <!-- 1. Menu de Navegação (Desktop Tradicional) -->
+    <nav class="header-nav">
+      <ul>
+        {%- for link in linklists[section.settings.menu].links -%}
+          <li>
+            <a href="{{ link.url }}">{{ link.title }}</a>
+            {%- if link.links != blank -%}
+              <svg class="nav-arrow" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    <!-- 2. Logotipo -->
+    <div class="header-logo">
+      <a href="{{ routes.root_url }}">
+        {%- if section.settings.logo != blank -%}
+          {{ section.settings.logo | image_url: width: 600 | image_tag: class: 'logo-main', alt: shop.name }}
+          {%- if section.settings.transparent_logo != blank and section.settings.enable_transparent -%}
+            {{ section.settings.transparent_logo | image_url: width: 600 | image_tag: class: 'logo-transparent', alt: shop.name }}
+          {%- endif -%}
+        {%- else -%}
+          <h2>{{ shop.name }}</h2>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- 3. Ícones (Pesquisa, Usuário, Carrinho) -->
+    <div class="header-icons">
+      <!-- Botão para Abrir Barra de Pesquisa -->
+      <button class="icon-search" id="OpenSearchBtn">
+        <svg class="header-icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16" y2="16"></line></svg>
+      </button>
+
+      <!-- Conta / Usuário (Permanece no header desktop) -->
+      <a href="{{ routes.account_url }}" class="icon-account">
+        <svg class="header-icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </a>
+      
+      <!-- Carrinho -->
+      <a href="{{ routes.cart_url }}" class="icon-cart">
+        <svg class="header-icon-svg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1.5"></circle><circle cx="20" cy="21" r="1.5"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Barra de Pesquisa Deslizante -->
+  <div class="header-search-bar" id="HeaderSearchBar">
+    <div class="search-bar-inner">
+      <form action="{{ routes.search_url }}" method="get" class="search-form">
+        <input type="hidden" name="options[prefix]" value="last">
+        <input type="text" name="q" placeholder="Procurando algo específico?" id="SearchInput" required>
+        <button type="submit" class="search-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16" y2="16"></line></svg>
+        </button>
+      </form>
+      <button class="search-close" id="CloseSearchBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Modal Menu Estrutura -->
+<div class="mobile-drawer-overlay" id="MobileDrawerOverlay"></div>
+<div class="mobile-drawer" id="MobileDrawer">
+  
+  <button class="drawer-close" id="CloseMobileMenu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </button>
+
+  <nav class="drawer-nav">
+    <ul>
+      {%- for link in linklists[section.settings.menu].links -%}
+        <li>
+          <a href="{{ link.url }}">
+            {{ link.title }}
+            {%- if link.links != blank -%}
+              <span class="drawer-nav-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </span>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+
+  <div class="drawer-footer">
+    <a href="{{ routes.account_url }}">Minha Conta</a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 1. Cabeçalho Fixo (Sticky)
+    const header = document.getElementById('SiteHeader');
+    if (header) {
+      const handleScroll = () => {
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled-down');
+        } else {
+          header.classList.remove('scrolled-down');
+        }
+      };
+      handleScroll();
+      window.addEventListener('scroll', handleScroll);
+    }
+
+    // 2. Mobile Drawer (Menu Lateral / Modal)
+    const openBtn = document.getElementById('OpenMobileMenu');
+    const closeBtn = document.getElementById('CloseMobileMenu');
+    const drawer = document.getElementById('MobileDrawer');
+    const overlay = document.getElementById('MobileDrawerOverlay');
+
+    if (openBtn && closeBtn && drawer && overlay) {
+      const openDrawer = () => {
+        drawer.classList.add('is-active');
+        overlay.classList.add('is-active');
+        document.body.style.overflow = 'hidden'; 
+      };
+
+      const closeDrawer = () => {
+        drawer.classList.remove('is-active');
+        overlay.classList.remove('is-active');
+        document.body.style.overflow = ''; 
+      };
+
+      openBtn.addEventListener('click', openDrawer);
+      closeBtn.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
+    }
+
+    // 3. Barra de Pesquisa Dropdown
+    const searchBtn = document.getElementById('OpenSearchBtn');
+    const closeSearchBtn = document.getElementById('CloseSearchBtn');
+    const searchBar = document.getElementById('HeaderSearchBar');
+    const searchInput = document.getElementById('SearchInput');
+
+    if (searchBtn && closeSearchBtn && searchBar && searchInput) {
+      searchBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        searchBar.classList.toggle('is-active');
+        if (searchBar.classList.contains('is-active')) {
+          setTimeout(() => searchInput.focus(), 100);
+        }
+      });
+      closeSearchBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        searchBar.classList.remove('is-active');
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Cabeçalho Principal",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logotipo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logotipo Principal"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 300,
+      "step": 5,
+      "unit": "px",
+      "label": "Largura do Logotipo",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Navegação"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu Principal",
+      "default": "main-menu"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposição do Cabeçalho",
+      "options": [
+        {
+          "value": "logo-center-menu-left",
+          "label": "Logotipo ao Centro, Menu à Esquerda"
+        },
+        {
+          "value": "logo-left-menu-center",
+          "label": "Logotipo à Esquerda, Menu ao Centro"
+        }
+      ],
+      "default": "logo-center-menu-left"
+    },
+    {
+      "type": "checkbox",
+      "id": "desktop_drawer",
+      "label": "Usar menu lateral (Drawer) no Desktop",
+      "default": false,
+      "info": "Substitui os menus de texto pelo ícone de hambúrguer em todas as telas."
+    },
+    {
+      "type": "header",
+      "content": "Menu Lateral (Drawer / Modal)"
+    },
+    {
+      "type": "color",
+      "id": "drawer_close_bg",
+      "label": "Cor de Fundo do Botão Fechar",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "drawer_close_color",
+      "label": "Cor do Ícone Fechar",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Cores Padrão"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Cor de Fundo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Cor do Texto/Menu",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Cor dos Ícones",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Cabeçalho Transparente & Fixo"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Ativar Cabeçalho Fixo (Sticky)",
+      "default": true,
+      "info": "O cabeçalho acompanha o ecrã ao fazer scroll."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent",
+      "label": "Ativar Transparência na Página Inicial",
+      "default": true,
+      "info": "Ideal para sobrepor imagens de banner no topo da loja."
+    },
+    {
+      "type": "range",
+      "id": "transparent_blur",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Nível de Blur (Desfoque)",
+      "default": 0,
+      "info": "0 significa sem desfoque. Use entre 5 e 20 para um efeito elegante."
+    },
+    {
+      "type": "image_picker",
+      "id": "transparent_logo",
+      "label": "Logotipo para Fundo Transparente",
+      "info": "Ex: Uma versão em branco do seu logotipo."
+    },
+    {
+      "type": "color",
+      "id": "transparent_text_color",
+      "label": "Cor do Texto (Transparente)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "transparent_icon_color",
+      "label": "Cor dos Ícones (Transparente)",
+      "default": "#ffffff"
+    }
+  ]
+}
+{% endschema %}

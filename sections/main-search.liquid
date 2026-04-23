@@ -1,0 +1,34 @@
+<section class="section">
+  <div class="page-width search-layout">
+    <h1 class="section-title">{{ 'sections.search.title' | t }}</h1>
+
+    <form action="{{ routes.search_url }}" method="get" class="field">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'general.search' | t }}">
+      <button type="submit">{{ 'general.search' | t }}</button>
+    </form>
+
+    {% if search.performed %}
+      {% if search.results_count > 0 %}
+        <div class="collection-grid">
+          {% for item in search.results %}
+            <div class="search-card">
+              <h2>
+                <a href="{{ item.url }}">{{ item.title | default: item.product.title | default: item.page.title }}</a>
+              </h2>
+              <p class="muted">{{ item.object_type | capitalize }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">{{ 'sections.search.empty' | t }}</div>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main search",
+  "settings": []
+}
+{% endschema %}

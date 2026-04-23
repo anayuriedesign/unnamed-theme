@@ -1,0 +1,22 @@
+<section class="section">
+  <div class="page-width">
+    <h1 class="section-title">Coleções</h1>
+    <div class="list-collections-grid">
+      {% for collection in collections %}
+        <a class="collection-card" href="{{ collection.url }}" style="padding:1.25rem; display:block;">
+          {% if collection.featured_image %}
+            {{ collection.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: collection.title }}
+          {% endif %}
+          <h2>{{ collection.title }}</h2>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main list collections",
+  "settings": []
+}
+{% endschema %}

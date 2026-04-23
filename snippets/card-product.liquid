@@ -1,0 +1,13 @@
+<a class="product-card" href="{{ product.url }}" style="display:block; overflow:hidden;">
+  <div>
+    {% if product.featured_image %}
+      {{ product.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: product.title }}
+    {% else %}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {% endif %}
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0;">{{ product.title }}</h3>
+    <p class="price" style="margin-bottom:0;">{{ product.price | money }}</p>
+  </div>
+</a>

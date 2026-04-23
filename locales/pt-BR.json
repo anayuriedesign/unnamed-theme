@@ -1,0 +1,35 @@
+{
+  "accessibility": {
+    "skip_to_text": "Pular para o conteúdo"
+  },
+  "general": {
+    "read_more": "Ler mais",
+    "view_all": "Ver tudo",
+    "search": "Buscar",
+    "continue_shopping": "Continuar comprando"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Adicionar ao carrinho",
+      "sold_out": "Esgotado",
+      "quantity": "Quantidade"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Seu carrinho",
+      "empty": "Seu carrinho está vazio",
+      "subtotal": "Subtotal",
+      "checkout": "Finalizar compra"
+    }
+  },
+  "sections": {
+    "header": {
+      "menu": "Menu"
+    },
+    "search": {
+      "title": "Resultados da busca",
+      "empty": "Nenhum resultado encontrado"
+    }
+  }
+}

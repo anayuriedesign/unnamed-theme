@@ -1,0 +1,26 @@
+<footer class="site-footer">
+  <div class="page-width footer-inner">
+    <div>
+      <h3>{{ shop.name }}</h3>
+      <p class="muted">{{ section.settings.text }}</p>
+    </div>
+
+    {% if section.settings.menu != blank %}
+      <ul class="footer-menu" role="list">
+        {% for link in section.settings.menu.links %}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Use este rodapé para colocar texto institucional, links e informações da marca." },
+    { "type": "link_list", "id": "menu", "label": "Menu" }
+  ]
+}
+{% endschema %}

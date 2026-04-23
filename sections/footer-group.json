@@ -1,0 +1,13 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "settings": {
+        "text": "Tema base para iniciar o desenvolvimento do seu próprio tema Shopify."
+      }
+    }
+  },
+  "order": ["footer"]
+}

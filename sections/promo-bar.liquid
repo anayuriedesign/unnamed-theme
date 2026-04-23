@@ -1,0 +1,150 @@
+{% if section.settings.show_promo_bar %}
+  {% style %}
+    .promo-bar-{{ section.id }} {
+      background-color: {{ section.settings.bg_color }};
+      color: {{ section.settings.text_color }};
+      text-align: center;
+      padding: 10px 20px;
+      font-size: {{ section.settings.font_size }}px;
+      font-weight: bold;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .promo-bar__link-{{ section.id }} {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+
+    .promo-bar__link-{{ section.id }}:hover {
+      opacity: 0.9;
+    }
+
+    .promo-bar__close {
+      position: absolute;
+      right: 15px;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 5px;
+    }
+
+    .promo-bar__close svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+  {% endstyle %}
+
+  <div class="promo-bar-{{ section.id }} promo-bar-wrapper" id="PromoBar-{{ section.id }}">
+    {% if section.settings.link != blank %}
+      <a href="{{ section.settings.link }}" class="promo-bar__link-{{ section.id }}">
+    {% endif %}
+
+      <span class="promo-bar__text">{{ section.settings.text }}</span>
+
+    {% if section.settings.link != blank %}
+      </a>
+    {% endif %}
+
+    {% if section.settings.show_close_button %}
+      <button class="promo-bar__close" id="ClosePromoBar-{{ section.id }}" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    {% endif %}
+  </div>
+
+  {% if section.settings.show_close_button %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const promoBar = document.getElementById('PromoBar-{{ section.id }}');
+        const closeBtn = document.getElementById('ClosePromoBar-{{ section.id }}');
+        const storageKey = 'promo_bar_closed_{{ section.id }}';
+
+        // Verifica se o usuário já fechou a barra nesta sessão
+        if (sessionStorage.getItem(storageKey) === 'true') {
+          promoBar.style.display = 'none';
+        }
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function() {
+            promoBar.style.display = 'none';
+            // Usa sessionStorage para manter a barra fechada apenas enquanto a aba estiver aberta
+            sessionStorage.setItem(storageKey, 'true'); 
+          });
+        }
+      });
+    </script>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Barra Promocional",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_promo_bar",
+      "label": "Ativar barra promocional",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Texto da Promoção",
+      "default": "FREE DOMESTIC STANDARD SHIPPING ON ORDERS OVER $30"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link da Barra (Opcional)"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Cor de Fundo",
+      "default": "#cc2020"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Cor do Texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho da Fonte",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close_button",
+      "label": "Mostrar botão de fechar (X)",
+      "default": false,
+      "info": "Se o cliente fechar, a barra só voltará a aparecer quando ele abrir o site novamente."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra Promocional"
+    }
+  ]
+}
+{% endschema %}

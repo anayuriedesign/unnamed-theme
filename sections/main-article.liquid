@@ -1,0 +1,16 @@
+<section class="section">
+  <div class="page-width article-layout">
+    <article class="article-card">
+      <p class="muted">{{ article.published_at | date: '%d/%m/%Y' }}</p>
+      <h1 class="section-title">{{ article.title }}</h1>
+      <div>{{ article.content }}</div>
+    </article>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main article",
+  "settings": []
+}
+{% endschema %}
