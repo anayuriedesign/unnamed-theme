@@ -160,9 +160,7 @@
               <span>{{ block.settings.label }}</span>
             </div>
           </div>
-          {%- unless section.settings.hide_label_on_hover and section.settings.label_only_on_hover -%}
-            <span class="category-label">{{ block.settings.label }}</span>
-          {%- endunless -%}
+          <span class="category-label">{{ block.settings.label }}</span>
         </a>
       {%- endif -%}
     {%- endfor -%}
